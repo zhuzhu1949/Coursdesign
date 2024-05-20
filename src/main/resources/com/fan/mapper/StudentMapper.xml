@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fan.mapper.StudentMapper">
+    <select id="list" resultType="com.fan.pojo.ListRe">
+        SELECT
+            stu.name AS studentName,
+            stu.sex AS sex,
+            sco.score AS score,
+            cou.name AS coureName,
+            tea.name AS teacherName
+        FROM
+            student stu
+                JOIN score sco ON stu.id = sco.student_id
+                JOIN course cou ON sco.course_id = cou.id
+                JOIN teacher tea ON cou.teacher_id = tea.id
+        WHERE
+            stu.password = #{password};
+    </select>
+    <select id="seacher" resultType="com.fan.pojo.ListRe">
+        SELECT
+            stu.name AS studentName,
+            stu.sex AS sex,
+            sco.score AS score,
+            cou.name AS coureName,
+            tea.name AS teacherName
+        FROM
+            student stu
+                JOIN score sco ON stu.id = sco.student_id
+                JOIN course cou ON sco.course_id = cou.id
+                JOIN teacher tea ON cou.teacher_id = tea.id
+        <where>
+            <if test="password != null">
+                stu.password = #{password}
+            </if>
+            <if test="coureName != null and coureName != ''">
+                AND cou.name like concat('%', #{coureName, jdbcType=VARCHAR},'%')
+            </if>
+            <if test="teacherName != null and teacherName != ''">
+                AND tea.name = #{teacherName, jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+    <select id="listund" resultType="com.fan.pojo.Understand">
+        SELECT
+            stu.name AS studentName,
+            sco.score AS score,
+            sco.passclass AS passclass,
+            sco.endhomeword AS endhomeword,
+            sco.experiment AS experiment,
+            sco.inclass,
+            cou.name AS coureName,
+            tea.name AS teacherName
+        FROM
+            student stu
+                JOIN score sco ON stu.id = sco.student_id
+                JOIN course cou ON sco.course_id = cou.id
+                JOIN teacher tea ON cou.teacher_id = tea.id
+        WHERE
+            stu.password = #{password};
+    </select>
+    <select id="rankk" resultType="com.fan.pojo.Student">
+        SELECT score, rank() over(ORDER BY score desc) as 'id' ,cou.name
+        FROM score
+                 JOIN course cou ON score.course_id = cou.id
+        where cou.name=#{coureName};
+    </select>
+    <select id="undSer" resultType="com.fan.pojo.Understand">
+        SELECT
+            stu.name AS studentName,
+            sco.score AS score,
+            sco.passclass AS passclass,
+            sco.endhomeword AS endhomeword,
+            sco.experiment AS experiment,
+            sco.inclass,
+            cou.name AS coureName,
+            tea.name AS teacherName
+        FROM
+            student stu
+                JOIN score sco ON stu.id = sco.student_id
+                JOIN course cou ON sco.course_id = cou.id
+                JOIN teacher tea ON cou.teacher_id = tea.id
+        <where>
+            <if test="password != null">
+                stu.password = #{password}
+            </if>
+            <if test="coureName != null and coureName != ''">
+                AND cou.name like concat('%', #{coureName, jdbcType=VARCHAR},'%')
+            </if>
+            <if test="teacherName != null and teacherName != ''">
+                AND tea.name = #{teacherName, jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+</mapper>

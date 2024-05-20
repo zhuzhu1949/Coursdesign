@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fan.mapper.TeacherMapper">
+    <select id="cla" resultType="com.fan.pojo.Children">
+        SELECT c.name AS name,
+                c.id
+        FROM course c
+                 JOIN teacher t ON c.teacher_id = t.id
+        WHERE t.password = #{password};
+    </select>
+    <select id="list" resultType="com.fan.pojo.Understand">
+        SELECT
+            cou.name AS coureName,
+            stu.name AS studentName,
+            stu.sex,
+            sco.inclass,
+            sco.passclass,
+            sco.endhomeword,
+            sco.experiment,
+            sco.score
+        FROM
+            student stu
+                JOIN score sco ON stu.id = sco.student_id
+                JOIN course cou ON sco.course_id = cou.id
+                JOIN teacher tea ON cou.teacher_id = tea.id
+        WHERE
+            tea.password = #{password};
+    </select>
+    <select id="sel" resultType="com.fan.pojo.Understand">
+        SELECT
+            cou.name AS coureName,
+            stu.name AS studentName,
+            stu.sex,
+            sco.inclass,
+            sco.passclass,
+            sco.endhomeword,
+            sco.experiment,
+            sco.score
+        FROM
+            student stu
+                JOIN score sco ON stu.id = sco.student_id
+                JOIN course cou ON sco.course_id = cou.id
+                JOIN teacher tea ON cou.teacher_id = tea.id
+        WHERE
+        <if test="password != null">
+            tea.password = #{password}
+        </if>
+        <if test="coureName != null and coureName != ''">
+            AND cou.name like concat('%', #{coureName, jdbcType=VARCHAR},'%')
+        </if>
+        <if test="studentName != null and studentName != ''">
+            AND stu.name like concat('%',#{studentName, jdbcType=VARCHAR},'%')
+        </if>
+    </select>
+    <insert id="insa">
+        INSERT INTO student (username, password, name, course_id, sex)
+        VALUES (#{username},
+                #{password},
+                #{studentName},
+                (SELECT id FROM course WHERE name = #{coureName}),
+                #{sex});
+    </insert>
+    <insert id="insb">
+        INSERT INTO score (student_id, course_id, score, inclass, passclass, endhomeword, experiment)
+        VALUES (
+                       (SELECT id FROM student WHERE name = #{studentName}),
+                       (SELECT id FROM course WHERE name = #{coureName}),
+                       #{score},
+                       #{inclass},
+                       #{passclass},
+                       #{endhomeword},
+                       #{experiment}
+               )
+    </insert>
+    <update id="update">
+        UPDATE score
+        SET inclass = #{inclass}, passclass = #{passclass}, experiment = #{experiment}, endhomeword = #{endhomeword}, score = #{score}
+        WHERE student_id = (SELECT id FROM student WHERE password = #{password})
+        AND course_id = (SELECT id FROM course WHERE name = #{coureName})
+    </update>
+    <update id="update0">
+        UPDATE student
+        SET name = #{studentName}, sex = #{sex}
+        WHERE password = #{password}
+    </update>
+</mapper>
